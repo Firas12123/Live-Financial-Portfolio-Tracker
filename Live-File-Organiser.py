@@ -68,6 +68,8 @@ def get_stock(choice2,rows):
                         stock_info.append(stock_ticker.info.get("displayName",symbol_choice))
                         stock_info.append(stock_ticker.info.get("shortname", "N/A"))
                         stock_info.append(symbol_choice)
+                        currency = stock_ticker.info.get("currency", "USD")
+                        stock_info.append(currency) # gets currency according to the market e.g. US market = $
                         return(stock_info)
                     elif stock_cho > len_stk or stock_cho<=0 :
                         word = f"You only have 1 option to chose from you cant chose {stock_cho}" if len_stk ==1 else f"You must pick a number between 1-{len_stk}!"
@@ -78,16 +80,14 @@ def get_stock(choice2,rows):
             print(f"Sorry the market didnt behaves expected please try again soon\nError:{e}")
             
 
-def get_details(max_price, choice2, rows, symbol):   # get the amount invested and the price of the stock at the price invested into a list as a tuple
+def get_details(max_price, choice2, rows, symbol,currency):   # get the amount invested and the price of the stock at the price invested into a list as a tuple
     x = 0
     purchases = []
     while x ==0:
             try:
                 word1 = "sold" if choice2 == "2" else "bought"
                 print("If you have made a mistake type [M] to return to the main menu")
-                amount_inv = input(f"Enter the amount you have {word1} of the stock, in $\n").lower()
-                stock_ticker = yf.Ticker(symbol)
-                current_price = round((stock_ticker.history(period="1d")["Close"].iloc[-1]), 2)
+                amount_inv = input(f"Enter the amount you have {word1} of the stock, in {currency}\n").lower()
                 if amount_inv.strip() == "m":
                     x +=1
                     return False
@@ -95,42 +95,38 @@ def get_details(max_price, choice2, rows, symbol):   # get the amount invested a
                 if amount_invested >0:
                     while True:
                             print("If you have made a mistake type [M] to return to the main menu")
-                            share_p = input(f"Enter the price of the stock when you {word1} it, in $\n").lower()
+                            share_p = input(f"Enter the price of the stock when you {word1} it, in {currency}\n").lower()
                             if share_p.strip() == "m":
                                 return False
-                            if choice2 == "2":
-                                try:
-                                    share_price = float(share_p)
+                            try:
+                                share_price = float(share_p)
+                                if choice2 == "2":
                                     total_shares = sum((row[1] / row[2]) for row in rows if symbol in row)
                                     shares_2sell = amount_invested / share_price  # calculate the current value stock holdings not the amount deposited
                                     total_value = total_shares*share_price
                                     if shares_2sell > total_shares:
-                                        print(f"You couldn't have sold at ${amount_invested:.2f} if you had ${total_value:.2f} in {symbol} at ${share_price}")
+                                        print(f"You couldn't have sold at {currency}{amount_invested:.2f} if you had {currency}{total_value:.2f} in {symbol} at {currency}{share_price}")
                                         continue
-                                    share_price = float(share_p)
-                                    if share_price >0 and (max_price == 0 or share_price<=max_price):
-                                        purchases.append((amount_invested,share_price))
-                                        choice = input("Enter [E] to add another buy or [ANY OTHER KEY] to continue\n").lower()
-                                        if choice == "e":
-                                            break
-                                        else:
-                                            x+=1
-                                            return purchases
-                                    elif share_price<0:
-                                        print("Enter a share price more than 0")
-                                        print("Enter [ANY LETER] to go back to the main menu")
-                                    elif share_price>max_price:
-                                        print(f"The max price was ${max_price} so you couldn't have bought it at ${share_price:.2f}!")
-                                        print("Enter [ANY LETER] to go back to the main menu")
+                                if share_price >0 and (max_price == 0 or share_price<=max_price):
+                                    purchases.append((amount_invested,share_price))
+                                    choice = input("Enter [E] to add another buy or [ANY OTHER KEY] to continue\n").lower()
+                                    if choice == "e":
+                                        break
                                     else:
-                                        print("Enter a valid number")
-                                except ValueError:
-                                    print("Make sure you enter a valid number")
-                                    continue
+                                        x+=1
+                                        return purchases
+                                elif share_price<0:
+                                    print("Enter a share price more than 0")
+                                elif share_price>max_price:
+                                    print(f"The max price was {currency}{max_price} so you couldn't have bought it at {currency}{share_price:.2f}!")
+                            except ValueError:
+                                print("Make sure you enter a valid number")
+                                continue
                 else:
-                    print("The amount invested much be greater than $0.00")
+                    print(f"The amount invested much be greater than {currency}0.00")
             except ValueError:
                 continue
+            
 def price_average(grouped_stocks):  # calculates the average price amongst the total amount and prices user has bought of the specific stock
     names = []
     average_price = []
@@ -160,14 +156,15 @@ def display_portfolio(average_price): # calculates percentage change based on li
     for stock in average_price:
         stock_ticker = yf.Ticker(stock[1])
         display_name = (stock_ticker.info.get("displayName", stock[1]))
+        currency = stock_ticker.info.get("currency", "$")
         if stock[0] == 0 or stock[2] <= 0:
-            print(f"You have sold all of your {display_name} shares the current holdings is $0.00")
+            print(f"You have sold all of your {display_name} shares the current holdings is {currency}0.00")
             continue
         else:
             current_price = round((stock_ticker.history(period="1d")["Close"].iloc[-1]), 2)
             percentage_change = round(((current_price - stock[0]) / stock[0]) * 100, 2)
             word = "up +" if (percentage_change/100)> 0 else "down "
-            print(f"{display_name} is {word}{percentage_change}% your current holdings in {display_name} is ${(current_price*stock[2]):.2f}")
+            print(f"{display_name} is {word}{percentage_change}% your current holdings in {display_name} is {currency}{(current_price*stock[2]):.2f}")
         
 def db_clear_symbol(symbol, cursor, connection):   # removes the row if we call to replace it
     cursor.execute("DELETE FROM portfolio WHERE symbol = ?", (symbol,))
@@ -203,8 +200,8 @@ while True:
             if stock_info == "M":
                 continue
             else:
-                max_price, current_price, display_name,shortname,symbol = stock_info  # assigns variables to their list index that got returned in stock_info function
-                purchases = get_details(max_price, choice2, rows, symbol)
+                max_price, current_price, display_name,shortname,symbol,currency = stock_info  # assigns variables to their list index that got returned in stock_info function
+                purchases = get_details(max_price, choice2, rows, symbol,currency)
                 if purchases == False:
                     pass
                 else:
@@ -217,8 +214,8 @@ while True:
             if stock_info == "M" or stock_info == False:
                 continue
             else:
-                max_price, current_price, display_name,shortname,symbol = stock_info
-                purchases = get_details(max_price, choice2, rows, symbol)
+                max_price, current_price, display_name,shortname,symbol, currency = stock_info
+                purchases = get_details(max_price, choice2, rows, symbol,currency)
                 if purchases == False:
                     pass
                 else:
