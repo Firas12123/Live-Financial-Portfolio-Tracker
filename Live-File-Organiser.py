@@ -179,8 +179,11 @@ def display_portfolio(average_price): # calculates percentage change based on li
     for stock in average_price:
         stock_ticker = yf.Ticker(stock[1])
         display_name = (stock_ticker.info.get("displayName", stock[1]))
-        cur = stock_ticker.info.get("currency", "$")
-        currency = currency_symbols.get(cur, cur) # cur, cur falls back on the currency if the symbol isnt found
+        if stock[1] in currency_symbols:
+            currency = currency_symbols[stock[1]]
+        else:
+            cur = stock_ticker.info.get("currency", "USD")
+            currency = currency_symbols.get(cur, cur)   # cur, cur falls back on the currency if the symbol isnt found
         if stock[0] == 0 or stock[2] <= 0:
             print(f"You have sold all of your {display_name} shares the current holdings is {currency}0.00")
             continue
@@ -304,4 +307,3 @@ while True:
         case _:
             break
 print("See you soon!")
-
