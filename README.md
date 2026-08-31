@@ -11,6 +11,6 @@ A Python CLI tool for tracking stock investments locally using SQLite and real-t
 
 ## Running the App
 
-1. Install the Yahoo Finance module (code wont run without it):
+1. Install the Yahoo Finance dependency:
    ```bash
    pip install yfinance

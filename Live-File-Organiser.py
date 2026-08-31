@@ -2,6 +2,28 @@ import yfinance as yf
 import logging
 import sqlite3
 logging.getLogger("yfinance").setLevel(logging.CRITICAL)  # blocks non-critical errors like 404 when user inputs invalid ticker
+currency_symbols = {
+                    "USD": "$",  # market currencies and they're symbols for better user readability
+                    "GBP": "£",
+                    "GBp": "p",
+                    "EUR": "€",
+                    "CAD": "CA$",
+                    "AUD": "A$",
+                    "JPY": "¥",
+                    "CHF": "CHF ",
+                    "CNY": "¥",
+                    "HKD": "HK$",
+                    "INR": "₹",
+                    "ZAR": "R",
+                    "SEK": "kr",
+                    "SGD": "S$",
+                    "BRL": "R$",
+                    "MXN": "Mex$",
+                    "NZD": "NZ$",
+                    "NOK": "kr",
+                    "DKK": "kr",
+                    "PLN": "zł",
+                    "KRW": "₩"}
 
 def db_sync():
     connection = sqlite3.connect("Portfolio.db") # create the database and table
@@ -68,8 +90,9 @@ def get_stock(choice2,rows):
                         stock_info.append(stock_ticker.info.get("displayName",symbol_choice))
                         stock_info.append(stock_ticker.info.get("shortname", "N/A"))
                         stock_info.append(symbol_choice)
-                        currency = stock_ticker.info.get("currency", "USD")
-                        stock_info.append(currency) # gets currency according to the market e.g. US market = $
+                        stock_currency = stock_ticker.info.get("currency", "USD") # gets currency symbol according to the market e.g. US market = $
+                        currency = currency_symbols.get(stock_currency, stock_currency)  # falls back on the stock_currency input if symbol isn't found inside our dictionary
+                        stock_info.append(currency)
                         return(stock_info)
                     elif stock_cho > len_stk or stock_cho<=0 :
                         word = f"You only have 1 option to chose from you cant chose {stock_cho}" if len_stk ==1 else f"You must pick a number between 1-{len_stk}!"
@@ -156,7 +179,8 @@ def display_portfolio(average_price): # calculates percentage change based on li
     for stock in average_price:
         stock_ticker = yf.Ticker(stock[1])
         display_name = (stock_ticker.info.get("displayName", stock[1]))
-        currency = stock_ticker.info.get("currency", "$")
+        cur = stock_ticker.info.get("currency", "$")
+        currency = currency_symbols.get(cur, cur) # cur, cur falls back on the currency if the symbol isnt found
         if stock[0] == 0 or stock[2] <= 0:
             print(f"You have sold all of your {display_name} shares the current holdings is {currency}0.00")
             continue
