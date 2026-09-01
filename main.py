@@ -1,133 +1,15 @@
 import yfinance as yf
 import logging
-import sqlite3
+from database import Database
+from stock import currency_symbols
+from portfolio import Portfolio
+
+
 
 logging.getLogger("yfinance").setLevel(
     logging.CRITICAL)  # blocks non-critical errors like 404 when user inputs invalid ticker
-currency_symbols = {
-    "USD": "$",  # market currencies and they're symbols for better user readability
-    "GBP": "£",
-    "GBp": "p",
-    "EUR": "€",
-    "CAD": "CA$",
-    "AUD": "A$",
-    "JPY": "¥",
-    "CHF": "CHF ",
-    "CNY": "¥",
-    "HKD": "HK$",
-    "INR": "₹",
-    "ZAR": "R",
-    "SEK": "kr",
-    "SGD": "S$",
-    "BRL": "R$",
-    "MXN": "Mex$",
-    "NZD": "NZ$",
-    "NOK": "kr",
-    "DKK": "kr",
-    "PLN": "zł",
-    "KRW": "₩"}
 
 
-class Database:
-    def __init__(self, db_name="Portfolio.db"):
-        self.db_name = db_name
-        self.connection, self.cursor = self.db_sync()
-    
-    def db_sync(self):
-        connection = sqlite3.connect(self.db_name)  # create the database and table
-        cursor = connection.cursor()
-        command1 = ("""CREATE TABLE IF NOT EXISTS portfolio(
-                           buy_id INTEGER PRIMARY KEY,
-                           symbol TEXT,
-                           amount_invested FLOAT,
-                           share_price FLOAT)""")
-        cursor.execute(command1)
-        connection.commit()
-        return connection, cursor
-
-
-class Stock:
-    def __init__(self, ticker):
-        self.ticker = ticker.upper()
-        self.ticker_obj = yf.Ticker(self.ticker)
-    
-    def get_current_price(self):
-        current_data = self.ticker_obj.history(period="1d")
-        if current_data.empty:
-            return None
-        return current_data["Close"].iloc[-1]
-        
-class Portfolio:
-    def __init__(self,db_obj):
-        self.db_obj = db_obj
-    
-    def get_grouped_stocks(self):
-        query = """
-                SELECT
-                symbol,
-                amount_invested,
-                share_price
-                FROM portfolio
-                """
-        grouped_stocks = self.db_obj.cursor.execute(query).fetchall()
-        return (grouped_stocks)
-    
-    def price_average(self, grouped_stocks):
-        names = []
-        average_price = []
-        for name, amount_invested, stock_price in grouped_stocks:
-            if stock_price == 0:
-                continue
-            if name not in names:
-                names.append(name)
-                shares = amount_invested / stock_price
-                average_p = amount_invested / shares
-                average_price.append((average_p, name, shares, amount_invested))
-            else:
-                shares = amount_invested / stock_price
-                for i, single_stock in enumerate(average_price):
-                    if name in single_stock:
-                        total_shares = single_stock[2] + shares
-                        if amount_invested > 0:
-                            total_amount = single_stock[3] + amount_invested
-                            average_p = total_amount / total_shares if total_shares != 0 else 0
-                        else:
-                            average_p = single_stock[0]
-                            total_amount = total_shares * average_p
-                        average_price.pop(i)
-                        average_price.append((average_p, name, total_shares, total_amount))
-                        break
-        return average_price
-
-    def display_portfolio(self,average_price):  # calculates percentage change based on live data
-        for stock in average_price:
-            stock_ticker = yf.Ticker(stock[1])
-            display_name = (stock_ticker.info.get("displayName", stock[1]))
-            if stock[1] in currency_symbols:
-                currency = currency_symbols[stock[1]]
-            else:
-                cur = stock_ticker.info.get("currency", "USD")
-                currency = currency_symbols.get(cur, cur)  # cur, cur falls back on the currency if the symbol isnt found
-            if stock[0] == 0 or stock[2] <= 0:
-                print(f"You have sold all of your {display_name} shares the current holdings is {currency}0.00")
-                continue
-            else:
-                price_history = stock_ticker.history(period = "1d")
-                if price_history.empty:
-                    print(f"Sorry we couldn't fetch the data for {display_name} right now\nPlease try again later")
-                    continue
-                current_price = round((stock_ticker.history(period="1d")["Close"].iloc[-1]), 2)
-                percentage_change = round(((current_price - stock[0]) / stock[0]) * 100, 2)
-                word = "up +" if (percentage_change / 100) > 0 else "down "
-                print(
-                    f"{display_name} is {word}{percentage_change}% your current holdings in {display_name} is {currency}{(current_price * stock[2]):.2f}")
-
-
-def db_assign(symbol, cursor, connection, purchases):  # assign variables inputed into the database table
-    for amount_invested, share_price in purchases:
-        cursor.execute("INSERT INTO portfolio(symbol, amount_invested, share_price) VALUES(?,?,?)",
-                       (symbol, amount_invested, share_price))
-        connection.commit()
 
 
 def get_stock(choice2, rows):
@@ -227,20 +109,6 @@ def get_details(max_price, choice2, rows, symbol,
             continue
 
 
-def db_clear_symbol(symbol, cursor, connection):  # removes the row if we call to replace it
-    cursor.execute("DELETE FROM portfolio WHERE symbol = ?", (symbol,))
-    connection.commit()
-
-
-def df_reset(cursor, connection):
-    choice = input("Press [D] to confirm resetting your portfolio [ANY OTHER KEY] to return to the main menu\n").lower()
-    if choice.strip() == "d":
-        cursor.execute("DELETE FROM portfolio")
-        connection.commit()
-        print("Your table has been deleted")
-    else:
-        pass
-
 
 choices_options = {"Declare a stock purchase to track on your portfolio": "1",
                    "Declare a stock sell to track on your portfolio": "2",
@@ -248,8 +116,6 @@ choices_options = {"Declare a stock purchase to track on your portfolio": "1",
                    "Declare the total amount you invested and the average price of your stock if available": "4",
                    "Reset your portfolio": "5"}
 db = Database()
-connection = db.connection
-cursor = db.cursor
 while True:
     print("\nEnter [ANY OTHER KEY] other than [1-5] if you want to stop the program")
     for chce, x in choices_options.items():
@@ -268,10 +134,9 @@ while True:
                 if purchases == False:
                     pass
                 else:
-                    db_assign(symbol, cursor, connection, purchases)
+                    db.db_assign(symbol,purchases)
                     my_portfolio = Portfolio(db)
                     rows = my_portfolio.get_grouped_stocks() # adds duplicate rows
-                    connection.commit()
         case "2":
             my_portfolio = Portfolio(db)
             rows = my_portfolio.get_grouped_stocks()
@@ -285,10 +150,9 @@ while True:
                     pass
                 else:
                     negative_sales = [(-amount, price) for amount, price in purchases]
-                    db_assign(symbol, cursor, connection, negative_sales)
+                    db.db_assign(symbol,negative_sales)
                     my_portfolio = Portfolio(db)
                     rows = my_portfolio.get_grouped_stocks()
-                    connection.commit()
         
         case "3":
             my_portfolio = Portfolio(db)
@@ -300,7 +164,6 @@ while True:
             else:
                 average_price = my_portfolio.price_average(grouped_stocks)
                 my_portfolio.display_portfolio(average_price)
-                connection.commit()
         case "4":
             my_portfolio = Portfolio(db)
             rows = my_portfolio.get_grouped_stocks()
@@ -330,25 +193,23 @@ while True:
                                 delete = input(
                                     f"Enter [D] if you would like to delete your current {stock_info[1]} holdings and replace it with your inputs or [ANY OTHER KEY] to add your inputs to your current holdings\n").lower()
                                 if delete.strip() == "d":
-                                    db_clear_symbol(symbol, cursor, connection)
+                                    db.db_clear_symbol(symbol)
                                     direct_purchase = [(total_amount, average_price)]
-                                    db_assign(symbol, cursor, connection, direct_purchase)
+                                    db.db_assign(symbol, direct_purchase)
                                     print(f"You successfully replaced your {stock_info[1]} previous average holdings")
                                 else:
                                     direct_purchase = [(total_amount, average_price)]
-                                    db_assign(symbol, cursor, connection, direct_purchase)
+                                    db.db_assign(symbol, direct_purchase)
                                     print(f"You successfully added to your current {stock_info[1]} holdings")
                             else:
                                 print(f"Make sure you enter a proper price of {stock_info[1]}")
                                 continue
                 except ValueError:
                     print("Make sure to enter a valid number!")
-                connection.commit()
         case "5":
             my_portfolio = Portfolio(db)
             rows = my_portfolio.get_grouped_stocks()
-            df_reset(cursor, connection)
-            connection.commit()
+            db.df_reset()
         case _:
             break
 print("See you soon!")
