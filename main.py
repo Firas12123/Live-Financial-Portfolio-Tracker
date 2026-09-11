@@ -78,7 +78,7 @@ def get_details(max_price, choice2, rows, symbol,
                 return False
             user_amount = float(amount_inv)
             if user_amount > 0:
-                if real_currency == "GBp":
+                if real_currency == user_currency: # only mixup is between GBP and GBp which is same currency but 100x more
                     amount_invested = user_amount
                 else:
                     url = f"https://api.frankfurter.dev/v1/latest?base={user_currency}&symbols={real_currency}"
