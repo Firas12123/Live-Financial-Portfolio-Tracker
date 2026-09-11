@@ -31,5 +31,5 @@ class Database:
         if choice.strip() == "d":
             self.cursor.execute("DELETE FROM portfolio")
             self.connection.commit()
-            print("Your table has been deleted")
+            print("Your portfolio has been reset")
     

@@ -3,19 +3,19 @@ import logging
 from database import Database
 from stock import currency_symbols
 from portfolio import Portfolio
-
-
+import requests
 
 logging.getLogger("yfinance").setLevel(
     logging.CRITICAL)  # blocks non-critical errors like 404 when user inputs invalid ticker
 
-
-
-
-def get_stock(choice2, rows):
+def get_stock(choice2, rows, currency_symbols):
     stock_info = []
     while True:  # verify if user input is a real stock name / ticker
         print("If this was a mistake type [M] to go back to the menu")
+        user_currency = input("Enter the currency you have purchased your stock with e.g ('GBP', 'USD')\n").upper()
+        while user_currency not in currency_symbols.keys():
+            print("Enter a valid currency")
+            user_currency = input("Enter the currency you have purchased your stocks with e.g ('GBP', 'USD')\n").upper()
         query = input("Enter a ticker symbol or a stock name\n").upper()
         if query.strip() == "M":
             return query
@@ -48,11 +48,12 @@ def get_stock(choice2, rows):
                         stock_info.append(stock_ticker.info.get("displayName", symbol_choice))
                         stock_info.append(stock_ticker.info.get("shortname", "N/A"))
                         stock_info.append(symbol_choice)
-                        stock_currency = stock_ticker.info.get("currency","USD")  # gets currency symbol according to the market e.g. US market = $
-                        currency = currency_symbols.get(stock_currency,
-                                                        stock_currency)  # falls back on the stock_currency input if symbol isn't found inside our dictionary
+                        stock_currency = stock_ticker.info.get("currency","N/A")  # gets currency symbol according to the market e.g. US market = $
+                        currency = currency_symbols.get(stock_currency,stock_currency)  # falls back on the stock_currency input if symbol isn't found inside our dictionary
                         stock_info.append(currency)
-                        return (stock_info)
+                        stock_info.append(user_currency)
+                        stock_info.append(stock_currency)
+                        return stock_info
                     elif stock_cho > len_stk or stock_cho <= 0:
                         word = f"You only have 1 option to chose from you cant chose {stock_cho}" if len_stk == 1 else f"You must pick a number between 1-{len_stk}!"
                         print(f"{word}")
@@ -63,19 +64,25 @@ def get_stock(choice2, rows):
 
 
 def get_details(max_price, choice2, rows, symbol,
-                currency):  # get the amount invested and the price of the stock at the price invested into a list as a tuple
+                currency, user_currency, real_currency):  # get the amount invested and the price of the stock at the price invested into a list as a tuple
     x = 0
     purchases = []
     while x == 0:
         try:
             word1 = "sold" if choice2 == "2" else "bought"
             print("If you have made a mistake type [M] to return to the main menu")
-            amount_inv = input(f"Enter the amount you have {word1} of the stock, in {currency}\n").lower()
+            user_symbol = currency_symbols.get(user_currency)
+            amount_inv = input(f"Enter the amount you have {word1} of the stock, in {user_symbol}\n").lower()
             if amount_inv.strip() == "m":
                 x += 1
                 return False
-            amount_invested = float(amount_inv)
-            if amount_invested > 0:
+            user_amount = float(amount_inv)
+            if user_amount > 0:
+                url = f"https://api.frankfurter.dev/v1/latest?base={user_currency}&symbols={real_currency}"
+                response = requests.get(url)
+                data = response.json()
+                rate = data["rates"][real_currency]
+                amount_invested = float(user_amount) * rate
                 while True:
                     print("If you have made a mistake type [M] to return to the main menu")
                     share_p = input(f"Enter the price of the stock when you {word1} it, in {currency}\n").lower()
@@ -89,10 +96,10 @@ def get_details(max_price, choice2, rows, symbol,
                             total_value = total_shares * share_price
                             if shares_2sell > total_shares:
                                 print(
-                                    f"You couldn't have sold at {currency}{amount_invested:.2f} if you had {currency}{total_value:.2f} in {symbol} at {currency}{share_price}")
+                                    f"You couldn't have sold at {user_currency}{amount_invested:.2f} if you had {currency}{total_value:.2f} in {symbol} at {currency}{share_price}")
                                 continue
                         if share_price > 0 and (max_price == 0 or share_price <= max_price):
-                            purchases.append((amount_invested, share_price))
+                            purchases.append((amount_invested, share_price))  # two brackets to store as a tuple
                             x += 1
                             return purchases
                         elif share_price < 0:
@@ -108,8 +115,14 @@ def get_details(max_price, choice2, rows, symbol,
         except ValueError:
             continue
 
-
-
+def display_currency(currency_symbols):
+    display_cur = input("Enter the currency you would like to view your portfolio in e.g 'GBP' or 'USD'\n").upper()
+    while display_cur not in currency_symbols.keys():
+        print("Enter a valid currency or type [Q] to quit")
+        display_cur = input("Enter the currency you would like to view your portfolio in e.g 'GBP' or 'USD'\n").upper()
+        if display_cur == "Q":
+            return display_cur
+    return display_cur
 choices_options = {"Declare a stock purchase to track on your portfolio": "1",
                    "Declare a stock sell to track on your portfolio": "2",
                    "Check my portfolio progress": "3",
@@ -125,12 +138,12 @@ while True:
         case "1":
             my_portfolio = Portfolio(db)
             rows = my_portfolio.get_grouped_stocks()
-            stock_info = get_stock(choice2, rows)
+            stock_info = get_stock(choice2, rows, currency_symbols)
             if stock_info == "M":
                 continue
             else:
-                max_price, display_name, shortname, symbol, currency = stock_info  # assigns variables to their list index that got returned in stock_info function
-                purchases = get_details(max_price, choice2, rows, symbol, currency)
+                max_price, display_name, shortname, symbol, currency, user_currency, real_currency = stock_info  # assigns variables to their list index that got returned in stock_info function
+                purchases = get_details(max_price, choice2, rows, symbol, currency, user_currency, real_currency)
                 if purchases == False:
                     pass
                 else:
@@ -140,12 +153,12 @@ while True:
         case "2":
             my_portfolio = Portfolio(db)
             rows = my_portfolio.get_grouped_stocks()
-            stock_info = get_stock(choice2, rows)
+            stock_info = get_stock(choice2, rows, currency_symbols)
             if stock_info == "M" or stock_info == False:
                 continue
             else:
-                max_price, display_name, shortname, symbol, currency = stock_info
-                purchases = get_details(max_price, choice2, rows, symbol, currency)
+                max_price, display_name, shortname, symbol, currency, user_currency, real_currency = stock_info
+                purchases = get_details(max_price, choice2, rows, symbol, currency, user_currency, real_currency)
                 if purchases == False:
                     pass
                 else:
@@ -155,6 +168,7 @@ while True:
                     rows = my_portfolio.get_grouped_stocks()
         
         case "3":
+            portfolio_currency = display_currency(currency_symbols)
             my_portfolio = Portfolio(db)
             rows = my_portfolio.get_grouped_stocks()
             grouped_stocks = my_portfolio.get_grouped_stocks()
@@ -163,7 +177,7 @@ while True:
                 continue
             else:
                 average_price = my_portfolio.price_average(grouped_stocks)
-                my_portfolio.display_portfolio(average_price)
+                my_portfolio.display_portfolio(average_price, portfolio_currency, currency_symbols)
         case "4":
             my_portfolio = Portfolio(db)
             rows = my_portfolio.get_grouped_stocks()
@@ -210,6 +224,10 @@ while True:
             my_portfolio = Portfolio(db)
             rows = my_portfolio.get_grouped_stocks()
             db.df_reset()
+
+        case "6":
+            pass
+
         case _:
             break
 print("See you soon!")

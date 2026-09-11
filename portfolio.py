@@ -1,5 +1,5 @@
-from stock import currency_symbols
 from stock import Stock
+import requests
 
 class Portfolio:
     def __init__(self, db_obj):
@@ -42,8 +42,8 @@ class Portfolio:
                         average_price.append((average_p, name, total_shares, total_amount))
                         break
         return average_price
-    
-    def display_portfolio(self, average_price):  # calculates percentage change based on live data
+
+    def display_portfolio(self, average_price, user_currency, currency_symbols):  # calculates percentage change based on live data
         for stock in average_price:
             stock_ticker = Stock(stock[1])
             display_name = stock_ticker.ticker_obj.info.get("displayName", stock[1])
@@ -58,13 +58,19 @@ class Portfolio:
                 continue
             else:
                 current_price = stock_ticker.get_current_price()
-                
+
                 if current_price is None:
                     print(f"Sorry we couldn't fetch the data for {display_name} right now\nPlease try again later")
                     continue
-                
+
                 current_price = round(current_price, 2)
                 percentage_change = round(((current_price - stock[0]) / stock[0]) * 100, 2)
                 word = "up +" if (percentage_change / 100) > 0 else "down "
-                print(
-                    f"{display_name} is {word}{percentage_change}% your current holdings in {display_name} is {currency}{(current_price * stock[2]):.2f}")
+                url = f"https://api.frankfurter.dev/v1/latest?base={cur}&symbols={user_currency}"
+                response = requests.get(url)
+                data = response.json()
+                rate = data["rates"][user_currency]
+                live_price = (current_price * stock[2])
+                amount_invested = float(live_price) * rate
+                cur_symbol = currency_symbols.get(user_currency)
+                print(f"{display_name} is {word}{percentage_change}% your current holdings in {display_name} is {cur_symbol}{amount_invested:.2f}")
