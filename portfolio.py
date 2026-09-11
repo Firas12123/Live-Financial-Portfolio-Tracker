@@ -66,11 +66,14 @@ class Portfolio:
                 current_price = round(current_price, 2)
                 percentage_change = round(((current_price - stock[0]) / stock[0]) * 100, 2)
                 word = "up +" if (percentage_change / 100) > 0 else "down "
-                url = f"https://api.frankfurter.dev/v1/latest?base={cur}&symbols={user_currency}"
-                response = requests.get(url)
-                data = response.json()
-                rate = data["rates"][user_currency]
                 live_price = (current_price * stock[2])
-                amount_invested = float(live_price) * rate
                 cur_symbol = currency_symbols.get(user_currency)
-                print(f"{display_name} is {word}{percentage_change}% your current holdings in {display_name} is {cur_symbol}{amount_invested:.2f}")
+                if cur.upper() != user_currency:
+                    url = f"https://api.frankfurter.dev/v1/latest?base={cur}&symbols={user_currency}"
+                    response = requests.get(url)
+                    data = response.json()
+                    rate = data["rates"][user_currency]
+                    amount_invested = float(live_price) * rate
+                else:
+                    amount_invested = live_price
+                print(f"{display_name} is {word}{percentage_change}% the current value is {cur_symbol}{amount_invested:.2f}")

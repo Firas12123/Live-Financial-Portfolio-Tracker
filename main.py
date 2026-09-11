@@ -78,11 +78,14 @@ def get_details(max_price, choice2, rows, symbol,
                 return False
             user_amount = float(amount_inv)
             if user_amount > 0:
-                url = f"https://api.frankfurter.dev/v1/latest?base={user_currency}&symbols={real_currency}"
-                response = requests.get(url)
-                data = response.json()
-                rate = data["rates"][real_currency]
-                amount_invested = float(user_amount) * rate
+                if real_currency == "GBp":
+                    amount_invested = user_amount
+                else:
+                    url = f"https://api.frankfurter.dev/v1/latest?base={user_currency}&symbols={real_currency}"
+                    response = requests.get(url)
+                    data = response.json()
+                    rate = data["rates"][real_currency]
+                    amount_invested = float(user_amount) * rate
                 while True:
                     print("If you have made a mistake type [M] to return to the main menu")
                     share_p = input(f"Enter the price of the stock when you {word1} it, in {currency}\n").lower()
