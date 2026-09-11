@@ -3,12 +3,19 @@ import logging
 from database import Database
 from stock import currency_symbols
 from portfolio import Portfolio
+<<<<<<< Updated upstream
 import requests
+=======
+>>>>>>> Stashed changes
 
 logging.getLogger("yfinance").setLevel(
     logging.CRITICAL)  # blocks non-critical errors like 404 when user inputs invalid ticker
 
+<<<<<<< Updated upstream
 def get_stock(choice2, rows, currency_symbols):
+=======
+def get_stock(choice2, rows):
+>>>>>>> Stashed changes
     stock_info = []
     while True:  # verify if user input is a real stock name / ticker
         print("If this was a mistake type [M] to go back to the menu")
@@ -63,8 +70,12 @@ def get_stock(choice2, rows, currency_symbols):
             print(f"Sorry the market didnt behaves expected please try again soon\nError:{e}")
 
 
+<<<<<<< Updated upstream
 def get_details(max_price, choice2, rows, symbol,
                 currency, user_currency, real_currency):  # get the amount invested and the price of the stock at the price invested into a list as a tuple
+=======
+def get_details(max_price, choice2, rows, symbol,currency):  # get the amount invested and the price of the stock at the price invested into a list as a tuple
+>>>>>>> Stashed changes
     x = 0
     purchases = []
     while x == 0:
