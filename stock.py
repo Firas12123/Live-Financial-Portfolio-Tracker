@@ -1,4 +1,5 @@
 import yfinance as yf
+
 currency_symbols = {
     "USD": "$",  # market currencies and they're symbols for better user readability
     "GBP": "£",
@@ -21,6 +22,7 @@ currency_symbols = {
     "DKK": "kr",
     "PLN": "zł",
     "KRW": "₩"}
+
 
 class Stock:
     def __init__(self, ticker):

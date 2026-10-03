@@ -1,0 +1,40 @@
+
+{
+    will-change: transform;
+    backface-visibility: hidden;
+}
+
+
+body{
+    background-color: #080808;
+    margin: 0;
+    padding: 0;
+    -webkit-backface-visibility: hidden;
+}
+
+.main-font{
+    font-family: 'Inter', sans-serif;
+    font-size: 19px;
+    letter-spacing: -1px;
+    font-weight: 600;
+    color: #DBDBDB;
+}
+
+#main-div{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: solid #D6D6D6 1px;
+}
+
+#nav-title{
+    font-size: 20px;
+    margin-left: 50px;
+}
+
+#pie-chart{
+    border: white solid 1px;
+    margin-left: auto;
+    width: 35%;
+    height: 500px;
+}

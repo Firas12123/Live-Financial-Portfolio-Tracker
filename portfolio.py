@@ -42,8 +42,9 @@ class Portfolio:
                         average_price.append((average_p, name, total_shares, total_amount))
                         break
         return average_price
-
-    def display_portfolio(self, average_price, user_currency, currency_symbols):  # calculates percentage change based on live data
+    
+    def display_portfolio(self, average_price, user_currency,
+                          currency_symbols):  # calculates percentage change based on live data
         for stock in average_price:
             stock_ticker = Stock(stock[1])
             display_name = stock_ticker.ticker_obj.info.get("displayName", stock[1])
@@ -58,11 +59,11 @@ class Portfolio:
                 continue
             else:
                 current_price = stock_ticker.get_current_price()
-
+                
                 if current_price is None:
                     print(f"Sorry we couldn't fetch the data for {display_name} right now\nPlease try again later")
                     continue
-
+                
                 current_price = round(current_price, 2)
                 percentage_change = round(((current_price - stock[0]) / stock[0]) * 100, 2)
                 word = "up +" if (percentage_change / 100) > 0 else "down "
