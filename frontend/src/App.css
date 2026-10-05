@@ -33,11 +33,12 @@ body{
 }
 
 .pie-chart{
-    border: #3DDC97 solid 1px;
     margin-left: auto;
     width: 45%;
-    height: 700px;
+    height: auto;
+    border: green solid 1px;
 }
+
 #currency-button{
     border-radius: 9px;
     

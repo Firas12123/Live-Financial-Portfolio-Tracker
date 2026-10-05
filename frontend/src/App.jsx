@@ -20,7 +20,7 @@ function App() {
                 })
             });
             const data = await response.json();
-            if (data.status === 200){
+            if (data.status === 200) {
                 SetPortfolioData(data.data)
             }
         }
@@ -33,9 +33,10 @@ function App() {
         <>
     <nav id="top-nav">
         <button className="currency-button" onClick={() => currencySet('GBP')}>GBP</button>
+        <p></p>
     </nav>
     <div className="pie-chart">
-        <PieChart portfolio={portfolioData}/>
+        <PieChart id="pie" portfolio={portfolioData}/>
     </div>
         </>
     );
