@@ -6,7 +6,7 @@
 
 
 body{
-    background-color: #080808;
+    background-color: #080A0C;
     margin: 0;
     padding: 0;
     -webkit-backface-visibility: hidden;
@@ -17,14 +17,14 @@ body{
     font-size: 19px;
     letter-spacing: -1px;
     font-weight: 600;
-    color: #DBDBDB;
+    color: #3DDC97;
 }
 
 #main-div{
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: solid #D6D6D6 1px;
+    border-bottom: solid #3DDC97 1px;
 }
 
 #nav-title{
@@ -32,9 +32,19 @@ body{
     margin-left: 50px;
 }
 
-#pie-chart{
-    border: white solid 1px;
+.pie-chart{
+    border: #3DDC97 solid 1px;
     margin-left: auto;
-    width: 35%;
-    height: 500px;
+    width: 45%;
+    height: 700px;
+}
+#currency-button{
+    border-radius: 9px;
+    
+}
+
+#top-nav{
+    display: flex;
+    border-bottom: solid 1px #3DDC97;
+    height: 50px;
 }
