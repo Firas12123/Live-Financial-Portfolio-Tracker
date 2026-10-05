@@ -45,6 +45,7 @@ class Portfolio:
     
     def display_portfolio(self, average_price, user_currency, currency_symbols):  # calculates percentage change based on live data
         stock_dict = {}
+        total_invested = []
         for stock in average_price:
             stock_ticker = Stock(stock[1])
             display_name = stock_ticker.ticker_obj.info.get("displayName", stock[1])
@@ -75,6 +76,7 @@ class Portfolio:
                     data = response.json()
                     rate = data["rates"][user_currency]
                     amount_invested = round(float(live_price * rate), 2)
+                    total_invested.append(amount_invested)
                 stock_dict[display_name] = [percentage_change, cur_symbol, amount_invested]
-        return stock_dict
+        return [stock_dict, f"{sum(total_invested):,.2f}"]
                 
