@@ -43,8 +43,8 @@ class Portfolio:
                         break
         return average_price
     
-    def display_portfolio(self, average_price, user_currency,
-                          currency_symbols):  # calculates percentage change based on live data
+    def display_portfolio(self, average_price, user_currency, currency_symbols):  # calculates percentage change based on live data
+        stock_dict = {}
         for stock in average_price:
             stock_ticker = Stock(stock[1])
             display_name = stock_ticker.ticker_obj.info.get("displayName", stock[1])
@@ -52,8 +52,7 @@ class Portfolio:
                 currency = currency_symbols[stock[1]]
             else:
                 cur = stock_ticker.ticker_obj.info.get("currency", "USD")
-                currency = currency_symbols.get(cur,
-                                                cur)  # cur, cur falls back on the currency if the symbol isnt found
+                currency = currency_symbols.get(cur, cur)  # cur, cur falls back on the currency if the symbol isnt found
             if stock[0] == 0 or stock[2] <= 0:
                 print(f"You have sold all of your {display_name} shares the current holdings is {currency}0.00")
                 continue
@@ -65,8 +64,7 @@ class Portfolio:
                     continue
                 
                 current_price = round(current_price, 2)
-                percentage_change = round(((current_price - stock[0]) / stock[0]) * 100, 2)
-                word = "up +" if (percentage_change / 100) > 0 else "down "
+                percentage_change = float(round(((current_price - stock[0]) / stock[0]) * 100, 2))
                 live_price = (current_price * stock[2])
                 cur_symbol = currency_symbols.get(user_currency)
                 if cur == user_currency:
@@ -76,5 +74,7 @@ class Portfolio:
                     response = requests.get(url)
                     data = response.json()
                     rate = data["rates"][user_currency]
-                    amount_invested = float(live_price) * rate
-                print(f"{display_name} is {word}{percentage_change}% the current value is {cur_symbol}{amount_invested:.2f}")
+                    amount_invested = round(float(live_price * rate), 2)
+                stock_dict[display_name] = [percentage_change, cur_symbol, amount_invested]
+        return stock_dict
+                

@@ -7,7 +7,7 @@ class Database:
         self.connection, self.cursor = self.db_sync()
     
     def db_sync(self):
-        connection = sqlite3.connect(self.db_name)  # create the database and table
+        connection = sqlite3.connect(self.db_name, check_same_thread = False)  # create the database and table
         cursor = connection.cursor()
         command1 = ("""CREATE TABLE IF NOT EXISTS portfolio(
                            buy_id INTEGER PRIMARY KEY,
