@@ -71,12 +71,15 @@ class Portfolio:
                 if cur == user_currency:
                     amount_invested = live_price
                 else:
-                    url = f"https://api.frankfurter.dev/v1/latest?base={cur}&symbols={user_currency}"
-                    response = requests.get(url)
-                    data = response.json()
-                    rate = data["rates"][user_currency]
-                    amount_invested = round(float(live_price * rate), 2)
-                    total_invested.append(amount_invested)
+                    try:
+                        url = f"https://api.frankfurter.dev/v1/latest?base={cur}&symbols={user_currency}"
+                        response = requests.get(url)
+                        data = response.json()
+                        rate = data["rates"][user_currency]
+                        amount_invested = round(float(live_price * rate), 2)
+                        total_invested.append(amount_invested)
+                    except:
+                        continue
                 stock_dict[display_name] = [percentage_change, cur_symbol, amount_invested]
         return [stock_dict, f"{sum(total_invested):,.2f}"]
                 

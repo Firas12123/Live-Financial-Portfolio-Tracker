@@ -17,7 +17,7 @@ export const PieChart = ({portfolio}) => {
             title: {
                 display: true,
                 text: "Total Value: £"+portfolio_value,
-                color: "#3DDC97",
+                color: "green",
                 font: {
                     size: 35,
                     weight: "bold",

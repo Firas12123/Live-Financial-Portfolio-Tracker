@@ -15,7 +15,7 @@ CORS(app)
 currency = "GBP"
 
 @app.route("/portfolio", methods= ["POST"])
-def home():
+def portfolio():
     data = request.get_json()
     global currency
     currency = data.get("currency", "GBP")
