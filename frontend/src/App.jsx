@@ -28,6 +28,12 @@ function App() {
             localStorage.setItem("currency", currency)
             sendPortfolioData(currency);
         }, [currency])
+    function saveCurrency(name, symbol){
+        localStorage.setItem("currency", name)
+        localStorage.setItem("symbol", symbol)
+        currencySet(name)
+        setCurrencies(false)
+    }
     const currency_cur = localStorage.getItem("currency")
     const [currencies, setCurrencies] = useState(false);
 
@@ -36,7 +42,7 @@ function App() {
     <nav id="top-nav">
         <div id="cur-div">
             <button className="main-font currency-button" id="current-currency" onClick={() => setCurrencies(!currencies)}>{currency_cur}</button>
-            <Currency_buttons curClass={currencies ? "currencies active" : "currencies"} currentPick={setCurrencies}/>
+            <Currency_buttons curClass={currencies ? "currencies active" : "currencies"} currentPick={saveCurrency}/>
         </div>
     </nav>
     <div className="pie-chart">

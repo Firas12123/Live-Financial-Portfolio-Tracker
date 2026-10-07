@@ -90,3 +90,7 @@ body{
 .currency-button:hover {
     transform: scale(1.08);
 }
+
+.currency-button:focus{
+    outline: darkgreen solid 2px;
+}
