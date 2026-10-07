@@ -1,7 +1,7 @@
 import {PieChart} from './components/Pie.jsx';
 import {useState, useEffect} from 'react'
 import './App.css';
-
+import {Currency_buttons} from './components/currencies.jsx';
 
 function App() {
         const [portfolioData, SetPortfolioData] = useState(null)
@@ -28,12 +28,16 @@ function App() {
             localStorage.setItem("currency", currency)
             sendPortfolioData(currency);
         }, [currency])
+    const currency_cur = localStorage.getItem("currency")
+    const [currencies, setCurrencies] = useState(false);
 
     return (
         <>
     <nav id="top-nav">
-        <button className="currency-button" onClick={() => currencySet('GBP')}>GBP</button>
-        <p></p>
+        <div id="cur-div">
+            <button className="main-font currency-button" id="current-currency" onClick={() => setCurrencies(!currencies)}>{currency_cur}</button>
+            <Currency_buttons curClass={currencies ? "currencies active" : "currencies"} currentPick={setCurrencies}/>
+        </div>
     </nav>
     <div className="pie-chart">
         <PieChart id="pie" portfolio={portfolioData}/>

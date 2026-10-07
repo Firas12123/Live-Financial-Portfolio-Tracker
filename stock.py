@@ -1,9 +1,8 @@
 import yfinance as yf
 
 currency_symbols = {
-    "USD": "$",  # market currencies and they're symbols for better user readability
+    "USD": "$",  # market currencies and their symbols for better user readability
     "GBP": "£",
-    "GBp": "p",
     "EUR": "€",
     "CAD": "CA$",
     "AUD": "A$",
@@ -21,7 +20,8 @@ currency_symbols = {
     "NOK": "kr",
     "DKK": "kr",
     "PLN": "zł",
-    "KRW": "₩"}
+    "KRW": "₩",
+    "GBp": "p",}
 
 
 class Stock:

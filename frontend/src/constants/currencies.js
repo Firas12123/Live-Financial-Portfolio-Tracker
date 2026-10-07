@@ -1,0 +1,22 @@
+
+export const Currencies ={
+    "GBP": "£",
+    "EUR": "€",
+    "USD": "$",
+    "CAD": "CA$",
+    "AUD": "A$",
+    "JPY": "¥",
+    "CHF": "CHF ",
+    "CNY": "¥",
+    "HKD": "HK$",
+    "INR": "₹",
+    "ZAR": "R",
+    "SEK": "kr",
+    "SGD": "S$",
+    "BRL": "R$",
+    "MXN": "Mex$",
+    "NZD": "NZ$",
+    "NOK": "kr",
+    "DKK": "kr",
+    "PLN": "zł",
+    "KRW": "₩",}

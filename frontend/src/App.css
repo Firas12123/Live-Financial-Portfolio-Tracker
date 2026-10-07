@@ -1,4 +1,4 @@
-
+.currency-button
 {
     will-change: transform;
     backface-visibility: hidden;
@@ -39,13 +39,54 @@ body{
     border: green solid 1px;
 }
 
-#currency-button{
+.currency-button{
     border-radius: 9px;
-    
+    height: 30px;
+    width: 120px;
+    margin: 2px 0;
+    text-align: center;
+    border: green solid 2px;
+    background: transparent;
+    color: green;
+    font-weight: 700;
+    font-size: 17px;
+    cursor: pointer;
+    transition: 0.3s ease;
 }
 
 #top-nav{
     display: flex;
+    align-items: center;
+    justify-content: space-between;
     border-bottom: solid 1px green;
     height: 50px;
+}
+
+#cur-div{
+    display: flex;
+    flex-direction: column;
+    top: 100px;
+    margin-left: 100px;
+}
+
+.currencies{
+    display: flex;
+    position: absolute;
+    flex-direction: column;
+    top: 20px;
+    transition: 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+}
+
+.currencies.active{
+    transform: translateY(40px);
+    opacity: 1;
+}
+
+#current-currency{
+    top: 1000px;
+}
+
+.currency-button:hover {
+    transform: scale(1.08);
 }

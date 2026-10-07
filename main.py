@@ -27,7 +27,8 @@ def portfolio():
     db_data = my_portfolio.display_portfolio(average_price, currency, currency_symbols)
     print(db_data)
     return jsonify({"data": db_data, "status": 200})
-    
+
+
 def display_currency(currency_symbols):
     display_cur = input("Enter the currency you would like to view your portfolio in e.g 'GBP' or 'USD'\n").upper()
     while display_cur not in currency_symbols.keys():
