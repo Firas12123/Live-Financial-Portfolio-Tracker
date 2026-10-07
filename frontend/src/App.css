@@ -76,11 +76,13 @@ body{
     top: 20px;
     transition: 0.3s ease, opacity 0.3s ease;
     opacity: 0;
+    visibility: hidden;
 }
 
 .currencies.active{
     transform: translateY(40px);
     opacity: 1;
+    visibility: visible;
 }
 
 #current-currency{
@@ -92,5 +94,5 @@ body{
 }
 
 .currency-button:focus{
-    outline: darkgreen solid 2px;
+    outline: darkgreen solid 1.5px;
 }

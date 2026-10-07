@@ -6,7 +6,7 @@ ChartJS.register(Tooltip, Legend, ArcElement, Title);
         return "#" + Math.floor(Math.random()*16777215).toString(16).padStart(6, "0")
     };
 
-export const PieChart = ({portfolio}) => {
+export const PieChart = ({portfolio, symbol}) => {
     if (!portfolio || !portfolio[0] || Object.keys(portfolio[0]).length === 0){
         return <p className="main-font" id="loading-data">Loading your data...</p>
     }
@@ -16,7 +16,7 @@ export const PieChart = ({portfolio}) => {
         plugins: {
             title: {
                 display: true,
-                text: "Total Value: £"+portfolio_value,
+                text: "Total Value: "+symbol+portfolio_value,
                 color: "green",
                 font: {
                     size: 35,
@@ -54,3 +54,4 @@ export const PieChart = ({portfolio}) => {
 
     return <Pie options={options} data={PieData}/>
 };
+

@@ -21,7 +21,7 @@ def portfolio():
     currency = data.get("currency", "GBP")
     my_portfolio = Portfolio(db)
     grouped_stocks = my_portfolio.get_grouped_stocks()
-    if grouped_stocks == []:
+    if not grouped_stocks:
         return jsonify({"status": 404, "data": []})
     average_price = my_portfolio.price_average(grouped_stocks)
     db_data = my_portfolio.display_portfolio(average_price, currency, currency_symbols)
