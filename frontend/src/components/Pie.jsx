@@ -36,7 +36,13 @@ export const PieChart = ({portfolio, symbol}) => {
     const portfolio_data = portfolio[0]
     const labels = Object.keys(portfolio_data)
     const stockValues = Object.values(portfolio_data)
-    const investedAmount = stockValues.map((stock) => stock[2]);
+    const investedAmount = stockValues.map((stock) => {
+        return Number(stock[2]).toLocaleString("en-GB",{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    });
+
     const dynamicColors = labels.map(() => randomColor());
     const PieData = {
         labels: labels,

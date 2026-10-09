@@ -13,6 +13,7 @@ logging.getLogger("yfinance").setLevel(logging.CRITICAL)  # blocks non-critical 
 app = Flask(__name__)
 CORS(app)
 currency = "GBP"
+db = Database()
 
 @app.route("/portfolio", methods= ["POST"])
 def portfolio():
@@ -43,8 +44,6 @@ choices_options = {"Declare a stock purchase to track on your portfolio": "1",
                    "Check my portfolio progress": "3",
                    "Declare the total amount you invested and the average price of your stock if available": "4",
                    "Reset your portfolio": "5"}
-
-db = Database()
 
 if __name__ == "__main__":
     app.run(port = 5000, debug=True)

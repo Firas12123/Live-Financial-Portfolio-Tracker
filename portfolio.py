@@ -6,15 +6,14 @@ class Portfolio:
         self.db_obj = db_obj
     
     def get_grouped_stocks(self):
-        self.db_obj.cursor.execute("""
+        result = self.db_obj.cursor.execute("""
                 SELECT
                 symbol,
                 amount_invested,
                 share_price
                 FROM portfolio
                 """)
-        grouped_stocks = self.db_obj.cursor.fetchall()
-        return (grouped_stocks)
+        return result.fetchall()
     
     def price_average(self, grouped_stocks):
         names = []
@@ -80,6 +79,6 @@ class Portfolio:
                         total_invested.append(amount_invested)
                     except:
                         continue
-                stock_dict[display_name] = [percentage_change, cur_symbol, amount_invested]
+                stock_dict[display_name] = [percentage_change, cur_symbol, float(amount_invested)]
         return [stock_dict, f"{sum(total_invested):,.2f}"]
                 
